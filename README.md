@@ -346,3 +346,4 @@ Test against a specific Puppet or Facter version:
 * If you had multiple commits, merge them together into one (`git rebase -i HEAD~4 if you had 4 commits and use fixup`, see: http://gitready.com/advanced/2009/02/10/squashing-commits-with-rebase.html)
 * Push to the branch (`git push origin my-new-feature`)
 * Create new Pull Request
+
