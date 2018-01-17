@@ -9,7 +9,7 @@ class keepalived::params {
   $service_restart = undef
 
   case $::osfamily {
-    'redhat': {
+    'RedHat': {
       $sysconf_dir        = 'sysconfig'
       $sysconf_options    = '-D'
       $config_dir         = '/etc/keepalived'
@@ -25,7 +25,7 @@ class keepalived::params {
       $service_name       = 'keepalived'
     }
 
-    'debian': {
+    'Debian': {
       $sysconf_dir        = 'default'
       $sysconf_options    = ''
       $config_dir         = '/etc/keepalived'
@@ -41,7 +41,7 @@ class keepalived::params {
       $service_name       = 'keepalived'
     }
 
-    'gentoo': {
+    'Gentoo': {
       $sysconf_dir        = 'conf.d'
       $sysconf_options    = '-D'
       $config_dir         = '/etc/keepalived'
