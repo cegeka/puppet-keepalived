@@ -1,194 +1,123 @@
-# == Define: keepalived::lvs::virtual_server
+# @summary
+#   Configure a Linux Virtual Server with keepalived
 #
-# Configure a Linux Virtual Server with keepalived
+#   Work in progress, supports:
+#     - single IP/port virtual servers
+#     - TCP_CHECK healthchecks
 #
-# Work in progress, supports:
-#   - single IP/port virtual servers
-#   - TCP_CHECK healthchecks
+# @param ip_address Virtual server IP address.
 #
-# === Parameters
+# @param port Virtual sever IP port.
 #
-# Refer to keepalived's documentation to understand the behaviour
-# of these parameters
+# @param fwmark Virtual Server firewall mark. (overrides ip_address and port)
 #
-# [*ip_address*]
-#   Virtual server IP address.
+# @param lb_algo Must be one of rr, wrr, lc, wlc, lblc, sh, mh, dh
 #
-# [*port*]
-#   Virtual sever IP port.
+# @param delay_loop
 #
-# [*fwmark*]
-#   Virtual Server firewall mark. (overrides ip_address and port)
-#   Default: not set
+# @param protocol
 #
-# [*lb_algo*]
-#   Must be one of rr, wrr, lc, wlc, lblc, sh, dh
-#   Default: not set.
+# @param lb_kind Must be one of NAT, TUN, DR.
 #
-# [*delay_loop*]
-#   Default: not set.
+# @param ha_suspend
 #
-# [*protocol*]
-#   Default: TCP
+# @param alpha
 #
-# [*lb_kind*]
-#   Must be one of NAT, TUN, DR.
-#   Default: NAT
+# @param omega
 #
-# [*ha_suspend*]
-#   Boolean.
-#   Default: false => not set in config.
+# @param mh_port Enable mh-port for mh scheduler
 #
-# [*alpha*]
-#   Boolean.
-#   Default: false => not set in config.
+# @param mh_fallback Enable mh-fallback for mh scheduler
 #
-# [*omega*]
-#   Boolean.
-#   Default: false => not set in config.
+# @param sh_port Enable sh-port for sh scheduler
 #
-# [*quorum*]
-#   Integer.
-#   Defaults to unset => does not appear in config.
+# @param sh_fallback Enable sh-fallback for sh scheduler
 #
-# [*hysteresis*]
-#   Integer.
-#   Defaults to unset => does not appear in config.
+# @param quorum
 #
-# [*tcp_check*]
-#   The TCP_CHECK to configure for real_servers.
-#   Should be a hash containing these keys:
-#     [*connect_timeout*]
-#   Default: unset => no TCP_CHECK configured.
+# @param quorum_up
 #
-# [*real_server_options*]
-#   One or more options to apply to all real_server blocks inside this
-#   virtual_server.
+# @param quorum_down
 #
-#   Example:
-#     real_server_options => {
-#       inhibit_on_failure => true,
-#       SMTP_CHECK => {
-#         connect_timeout => 10
-#         host => {
-#           connect_ip => '127.0.0.1'
-#         }
-#       }
-#     }
+# @param hysteresis
 #
-#   Default: unset => no default options
+# @param tcp_check The TCP_CHECK to configure for real_servers.
 #
-# [*sorry_server*]
-#   The sorry_server to define
-#   A hash with these keys:
-#     [*ip_address*]
-#     [*port*]
+# @param real_server_options One or more options to apply to all real_server blocks inside this virtual_server.
 #
-# [*real_servers*]
-#   The real servers to balance to.
-#   An array of hashes.
-#   Hash keys:
-#     [*ip_address*]
-#     [*port*]       (if ommitted the port defaults to the VIP port)
+# @param sorry_server The sorry_server to define
 #
-# [*collect_exported*]
+# @param sorry_server_inhibit
+#
+# @param persistence_timeout
+#
+# @param virtualhost
+#
+# @param real_servers The real servers to balance to.
+#
+# @param collect_exported
 #   Boolean. Automatically collect exported @@keepalived::lvs::real_servers
 #   with a virtual_server equal to the name/title of this resource. This allows
 #   you to easily export a real_server resource on each node in the pool.
-#   Defaults to true => collect exported real_servers
+#
+# @example
+#   real_server_options => {
+#     inhibit_on_failure => true,
+#     SMTP_CHECK => {
+#       connect_timeout => 10
+#       host => {
+#         connect_ip => '127.0.0.1'
+#       }
+#     }
+#   }
 #
 define keepalived::lvs::virtual_server (
-  $lb_algo,
-  $ip_address          = undef,
-  $port                = undef,
-  $fwmark              = undef,
-  $alpha               = false,
-  $collect_exported    = true,
-  $delay_loop          = undef,
-  $ha_suspend          = false,
-  $hysteresis          = undef,
-  $lb_kind             = 'NAT',
-  $omega               = false,
-  $persistence_timeout = undef,
-  $protocol            = 'TCP',
-  $quorum              = undef,
-  $real_servers        = undef,
-  $sorry_server        = undef,
-  $tcp_check           = undef,
-  $real_server_options = {},
-  $virtualhost         = undef,
+  Enum['rr','wrr','lc','wlc','lblc','sh','dh', 'mh'] $lb_algo,
+  Optional[Stdlib::IP::Address] $ip_address = undef,
+  Optional[Stdlib::Port] $port = undef,
+  Optional[Integer[1]] $fwmark = undef,
+  Boolean $alpha = false,
+  Boolean $collect_exported = true,
+  Optional[Integer[1]] $delay_loop = undef,
+  Boolean $ha_suspend = false,
+  Optional[Integer[0]] $hysteresis = undef,
+  Enum['NAT','DR','TUN'] $lb_kind = 'NAT',
+  Boolean $omega = false,
+  Boolean $mh_port = false,
+  Boolean $mh_fallback = false,
+  Boolean $sh_port = false,
+  Boolean $sh_fallback = false,
+  Optional[Integer[1]] $persistence_timeout = undef,
+  Enum['TCP','UDP'] $protocol = 'TCP',
+  Optional[Integer[1]] $quorum = undef,
+  Optional[String[1]] $quorum_up = undef,
+  Optional[String[1]] $quorum_down = undef,
+  Array[Hash] $real_servers = [],
+  Optional[Struct[{ ip_address => Stdlib::IP::Address, port => Stdlib::Port }]] $sorry_server = undef,
+  Boolean $sorry_server_inhibit = false,
+  Optional[Hash] $tcp_check = undef,
+  Hash $real_server_options = {},
+  Optional[Stdlib::Fqdn] $virtualhost = undef,
 ) {
-  $_name = regsubst($name, '[:\/\n]', '')
+  $_name = regsubst($name, '[:\/\n]', '', 'G')
 
-  if ( ! $fwmark ) {
-    if ( ! is_ip_address($ip_address) ) {
-      fail('Invalid IP address')
-    }
-
-    validate_re($port, '^[0-9]{1,5}$', "Invalid port: ${port}")
-  }
-  else {
-    validate_re($fwmark, '^[0-9]+$', "Invalid fwmark: ${fwmark}")
+  unless $fwmark {
+    assert_type(Stdlib::Port, $port)
+    assert_type(Stdlib::IP::Address, $ip_address)
   }
 
-  validate_re(
-    $lb_algo, '^(rr|wrr|lc|wlc|lblc|sh|dh)$',
-    "Invalid lb_algo: ${lb_algo}"
-  )
-
-  if $delay_loop {
-    validate_re(
-      $delay_loop,
-      '^[0-9]+$',
-      "Invalid delay_loop: ${delay_loop}"
-    )
-  }
-
-  validate_re($lb_kind, '^(NAT|DR|TUN)$', "Invalid lb_kind: ${lb_kind}")
-  validate_re($protocol, '^(TCP|UDP)$', "Invalid protocol: ${protocol}")
-  validate_bool($ha_suspend)
-  validate_bool($alpha)
-  validate_bool($omega)
-
-  if $quorum { validate_re($quorum, '^[0-9]+$', "Invalid quorum: ${quorum}") }
-
-  if $hysteresis {
-    validate_re(
-      $hysteresis,
-      '^[0-9]+$',
-      "Invalid hysteresis ${hysteresis}"
-    )
-  }
-
-  if $sorry_server {
-    if ( ! is_ip_address($sorry_server['ip_address']) ) {
-      fail("Invalid sorry server IP address: ${sorry_server['ip_address']}")
-    }
-
-    validate_re(
-      $sorry_server['port'],
-      '^[0-9]{1,5}$',
-      "Invalid sorry serverport: ${sorry_server['port']}"
-    )
-  }
-
-  if $tcp_check != undef {
-    warning('the $tcp_check argument is deprecated in favor of
-            $real_server_options')
-  }
-
-  if $real_server_options != undef {
-    validate_hash($real_server_options)
+  if $tcp_check {
+    warning('the $tcp_check argument is deprecated in favor of $real_server_options')
   }
 
   concat::fragment { "keepalived.conf_lvs_virtual_server_${_name}":
-    target  => "${::keepalived::config_dir}/keepalived.conf",
+    target  => "${keepalived::config_dir}/keepalived.conf",
     content => template('keepalived/lvs_virtual_server.erb'),
     order   => "250-${_name}-000",
   }
 
   concat::fragment { "keepalived.conf_lvs_virtual_server_${_name}-footer":
-    target  => "${::keepalived::config_dir}/keepalived.conf",
+    target  => "${keepalived::config_dir}/keepalived.conf",
     content => "}\n",
     order   => "250-${_name}-zzz",
   }

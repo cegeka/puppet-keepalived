@@ -1,8 +1,23 @@
-*.swp
-.DS_Store
-Gemfile.lock
-pkg
-spec/fixtures
-.vagrant/
-/.project
-.bundle
+# Managed by modulesync - DO NOT EDIT
+# https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
+
+/pkg/
+/Gemfile.lock
+/Gemfile.local
+/vendor/
+/.vendor/
+/spec/fixtures/manifests/
+/spec/fixtures/modules/
+/.vagrant/
+/.bundle/
+/.ruby-version
+/coverage/
+/log/
+/.idea/
+/.dependencies/
+/.librarian/
+/Puppetfile.lock
+*.iml
+.*.sw?
+/.yardoc/
+/Guardfile

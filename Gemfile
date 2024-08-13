@@ -1,35 +1,32 @@
-source 'https://rubygems.org'
+# Managed by modulesync - DO NOT EDIT
+# https://voxpupuli.org/docs/updating-files-managed-with-modulesync/
 
-puppetversion = ENV.key?('PUPPET_VERSION') ? "~> #{ENV['PUPPET_VERSION']}" : ['>= 3.2.1']
-gem 'puppet', puppetversion
+source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
-# Support ruby < 2.0.0
-# https://github.com/rspec/rspec-core/issues/1864
-gem 'rspec',     '~> 2.0'   if RUBY_VERSION >= '1.8.7' && RUBY_VERSION < '1.9'
-gem 'rake',      '~> 10.0'  if RUBY_VERSION >= '1.8.7' && RUBY_VERSION < '1.9'
-gem 'json',      '<= 1.8'   if RUBY_VERSION < '2.0.0'
-gem 'json_pure', '< 2.0.0'  if RUBY_VERSION < '2.0.0'
-
-if puppetversion =~ /^3/
-  ## rspec-hiera-puppet is puppet 3 only
-  gem 'rspec-hiera-puppet', '>=1.0.0'
+group :test do
+  gem 'voxpupuli-test', '~> 7.0',   :require => false
+  gem 'coveralls',                  :require => false
+  gem 'simplecov-console',          :require => false
+  gem 'puppet_metadata', '~> 3.5',  :require => false
 end
 
-facterversion = ENV.key?('FACTER_VERSION') ? "~> #{ENV['FACTER_VERSION']}" : ['>= 1.7.1']
-
-gem 'facter', facterversion
-
-gem 'puppet-lint', '>=0.3.2'
-gem 'puppetlabs_spec_helper', '>=0.8.0'
-gem 'puppet-syntax'
-
 group :development do
-  gem 'guard'
-  gem 'guard-rake'
+  gem 'guard-rake',               :require => false
+  gem 'overcommit', '>= 0.39.1',  :require => false
 end
 
 group :system_tests do
-  gem 'beaker-rspec',  :require => false
-  gem 'serverspec',    :require => false
-  gem 'vagrant-wrapper', :require => false
+  gem 'voxpupuli-acceptance', '~> 3.0',  :require => false
 end
+
+group :release do
+  gem 'voxpupuli-release', '~> 3.0',  :require => false
+end
+
+gem 'rake', :require => false
+gem 'facter', ENV['FACTER_GEM_VERSION'], :require => false, :groups => [:test]
+
+puppetversion = ENV['PUPPET_GEM_VERSION'] || '~> 7.24'
+gem 'puppet', puppetversion, :require => false, :groups => [:test]
+
+# vim: syntax=ruby

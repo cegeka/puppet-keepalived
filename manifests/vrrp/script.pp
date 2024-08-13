@@ -1,41 +1,38 @@
-# == Define: keepalived::vrrp::script
+# @summary Configure VRRP script
 #
-# === Parameters:
+# @param interval Set the interval to run the vrrp script.
 #
-# $ensure::   Default: present
+# @param script Which command or script to execute.
 #
-# $interval:: Set the interval to run the vrrp script.
-#             Default: '2'
+# @param weight The weight the script should add to the instance.
 #
-# $script::   Which command or script to execute.
-#             Default: undef
+# @param fall required number of failures for KO switch.
 #
-# $weight::   The weight the script should add to the instance.
-#             Default: '2'
+# @param rise required number of successes for OK switch.
 #
-# $fall::     required number of failures for KO switch.
-#             Default: undef
+# @param timeout max time to wait for the vrrp script to return.
 #
-# $rise::     required number of successes for OK switch.
-#             Default: undef
+# @param user user to run the vrrp script under.
 #
-# $timeout::  max time to wait for the vrrp script to return.
-#             Default: undef
+# @param group group to run the vrrp script under - only used if $user is also set.
+#
+# @param no_weight
+#
+# @param init_fail assume script initially is in failed state if true.
 #
 define keepalived::vrrp::script (
+  String[1] $script,
   $interval  = '2',
-  $script    = undef,
   $weight    = undef,
   $fall      = undef,
   $rise      = undef,
   $timeout   = undef,
+  $user      = undef,
+  $group     = undef,
   $no_weight = false,
+  $init_fail = false,
 ) {
-  $_name = regsubst($name, '[:\/\n]', '')
-
-  if ! $script {
-    fail 'No script provided.'
-  }
+  $_name = regsubst($name, '[:\/\n]', '', 'G')
 
   if ! $weight {
     $weight_real = 2
@@ -48,9 +45,8 @@ define keepalived::vrrp::script (
   }
 
   concat::fragment { "keepalived.conf_vrrp_script_${_name}":
-    target  => "${::keepalived::config_dir}/keepalived.conf",
+    target  => "${keepalived::config_dir}/keepalived.conf",
     content => template('keepalived/vrrp_script.erb'),
     order   => '002',
   }
 }
-
